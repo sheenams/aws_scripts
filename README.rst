@@ -12,10 +12,28 @@ dependencies
 
 * Python 2.7.x
 * Tested on Linux and OS X.
-* boto 2.9.5
+* boto 2.9.5 
 
 installation
 ============
+Boto installation:
+   $ pip install -U boto
+
+Edit the .boto configuration file
+   [Credentials]
+   aws_access_key_id = 
+   aws_secret_access_key =
+   
+   [Boto]
+   ec2_region_name = us-west-2
+   ec2_region_endpoint = us-west-2.ec2.amazonaws.com
+
+   sqs_region_name = us-west-2
+   sqs_region_endpoint = us-west-2.ec2.amazonaws.com
+   
+   glacier_region_name = us-west-2
+   glacier_region_endpoint = us-west-2.ec2.amazonaws.com
+
 
 Clone the project from the git repository to create a new
 project. You will need to choose a name for the project (let's say
@@ -31,12 +49,12 @@ UNIX command line syntax. Note that for development, it is convenient
 to run ``aws`` from within the project directory by specifying the
 relative path to the script::
 
-    % cd aws_scripts
-    % ./aws --help
+    $ cd aws_scripts
+    $ ./aws --help
 
 or::
 
-   % path/to/aws_scripts/aws --help
+   $ path/to/aws_scripts/aws --help
 
 When invoked this way, the local version of the package is imported,
 even if the version of the package is installed to the system. This is
