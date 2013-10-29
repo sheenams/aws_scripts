@@ -12,7 +12,7 @@ dependencies
 
 * Python 2.7.x
 * Tested on Linux and OS X.
-* boto
+* boto 2.9.5
 
 installation
 ============
