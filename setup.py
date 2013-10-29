@@ -15,9 +15,9 @@ subprocess.call('git shortlog --format="XXYYXX%h" | grep -c XXYYXX > aws_scripts
 
 from aws_scripts import __version__
 
-params = {'author': 'Your name',
-          'author_email': 'Your email',
-          'description': 'Package description',
+params = {'author': 'Sheena Scroggins',
+          'author_email': 'sheena.scroggins@gmail.com',
+          'description': 'Scripts to use Glacier on AWS',
           'name': 'aws_scripts',
           'packages': ['aws_scripts','aws_scripts.scripts','aws_scripts.subcommands'],
           'package_dir': {'aws_scripts': 'aws_scripts'},

@@ -1,7 +1,5 @@
 """
-Package description (in aws_scripts/__init__.py)
-
-Update me!
+Scripts to work with Glacier archival on AWS, using boto
 """
 
 from os.path import join, dirname
