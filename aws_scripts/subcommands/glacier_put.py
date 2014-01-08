@@ -11,31 +11,30 @@ import logging
 import shutil
 import os
 import re
-import csv 
+import csv
 import sys
 
 import sqlite3
 import subprocess
-import argparse 
+import argparse
 import boto
 
-from itertools import islice 
+
+from itertools import islice
 from boto.iam.connection import IAMConnection
 from boto.glacier.layer1 import Layer1
 from boto.glacier.vault import Vault
-from munging import filters
-from munging.utils import walker, munge_path
+from aws_scripts import filters
+from aws_scripts.utils import walker, munge_path
 from datetime import date
 
+fname=__name__.split('.')[-1]+'.log'
+logging.basicConfig(filename = fname,
+                    filemode = 'a',
+                    format='%(message)s',
+                    level = logging.INFO)
 
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
-# log = logging.getLogger("")
-# log.setLevel(logging.INFO)
-# fh=logging.FileHandler('glacier_put.log')
-# log.addHandler(fh)
-
+logging.info("Starting archival on %s", date.today())
 
 def build_parser(parser):
     parser.add_argument('archive_data',
@@ -57,12 +56,12 @@ def build_parser(parser):
 
 def connect_iam():
     """
-    Connect to IAM and determine user defined by access key 
+    Connect to IAM and determine user defined by access key
     """
     iam=boto.connect_iam()
     user=iam.get_user()
     amazon_user=user['get_user_response']['get_user_result']['user']['user_name']
-    log.info('amazon_user: %s' % amazon_user)
+    logging.info('amazon_user: %s' % amazon_user)
     return amazon_user
 
 def get_glacier_vault(year, dept):
@@ -81,12 +80,12 @@ def get_glacier_vault(year, dept):
 
 def create_tarball(parent, target):
     """
-    create tarball (.tar.gz) of target directories 
+    create tarball (.tar.gz) of target directories
     """
 
-    # -C= directory, -czf= create gzip files , include only fastqs in target dir 
+    # -C= directory, -czf= create gzip files , include only fastqs in target dir
     subprocess.check_call(['tar','-C', parent,'-czf', target + '.tar.gz', target])
-    
+
 
 def get_md5sum(target):
     """
@@ -94,54 +93,54 @@ def get_md5sum(target):
     """
     md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
     md5sum=md5sum.split(' ')[0]
-    log.info('md5sum: %s' % md5sum)
+    logging.info('md5sum: %s' % md5sum)
     return md5sum
 
 def glacier_upload(vault, target, keep_tarball):
-    """     
+    """
    # upload to glacier, fail if exception occurs
    """
     try:
         archive_id=vault.concurrent_create_archive_from_file(target+'.tar.gz', target+'.tar.gz')
-        log.info('archived id: %s' % archive_id)
+        logging.info('archived id: %s' % archive_id)
     except UploadArchiveError:
-        log.error('Failed to upload %s' % target)
+        logging.error('Failed to upload %s' % target)
     if not keep_tarball:
         subprocess.check_call(['rm', target+'.tar.gz'])
-    return archive_id    
-    
+    return archive_id
+
 def write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user):
     """
     Store info in data for writing to archive file
     """
     data.append({
             'dirname':target+'.tar.gz',
-            'vault_name':target_vault_name, 
+            'vault_name':target_vault_name,
             'archive_name' :archive_id,
             'run' : munge_path(target)['run'],
             'upload_date':str(date.today()),
             'md5sum':md5sum,
             'amazon_user':amazon_user
             })
-    log.info('archive_info: %s' % data)
+    logging.info('archive_info: %s' % data)
     return data
 
 def action(args):
     #create list for storing all info for writing to archive file later
     data=[]
-    
+
     amazon_user=connect_iam()
     target_vault_name, vault=get_glacier_vault(args.year, args.dept)
     for d in args.target_dir_list:
         d=d.rstrip("'\n','/'")
         parent,target=os.path.split(d)
-        log.info('target: %s' % target)
+        logging.info('target: %s' % target)
 
-    #     create_tarball(parent, target)
-    #     md5sum=get_md5sum(target)
-    #     archive_id=glacier_upload(vault, target, args.keep_tarball)
-    #     data=write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
-    
+        # create_tarball(parent, target)
+        # md5sum=get_md5sum(target)
+        # archive_id=glacier_upload(vault, target, args.keep_tarball)
+        # data=write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
+
     # writer = csv.DictWriter(args.archive_data,
     #                         fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
     #                         delimiter='\t',

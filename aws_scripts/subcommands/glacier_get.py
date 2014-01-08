@@ -1,5 +1,5 @@
 """
-Purpose: retrieve an archive from a glacier vault 
+Purpose: retrieve an archive from a glacier vault
 
 Usage:
 
@@ -15,9 +15,15 @@ import sys
 import os.path
 import json
 import logging
- 
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+from datetime import date
+
+fname=__name__.split('.')[-1]+'.log'
+logging.basicConfig(filename = fname,
+                    filemode = 'a',
+                    format='%(message)s',
+                    level = logging.INFO)
+
+logging.info("Starting archival on %s", date.today())
 
 
 def build_parser(parser):
@@ -32,11 +38,11 @@ def build_parser(parser):
 def action(args):
     target_vault_name = args.target_vault_name
     archived_id = args.archive_id
-    
+
     glacier=boto.glacier.connect_to_region('us-west-2')
     vault=glacier.get_vault(target_vault_name)
     job=vault.retrieve_archive(archive_id)
-    job.download_to_file(args.archive_filename+'tar.gz')     
+    job.download_to_file(args.archive_filename+'tar.gz')
 
     print("Operation complete.")
 
