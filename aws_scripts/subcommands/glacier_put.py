@@ -136,15 +136,15 @@ def action(args):
         parent,target=os.path.split(d)
         logging.info('target: %s' % target)
 
-        # create_tarball(parent, target)
-        # md5sum=get_md5sum(target)
-        # archive_id=glacier_upload(vault, target, args.keep_tarball)
-        # data=write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
+        create_tarball(parent, target)
+        md5sum=get_md5sum(target)
+        archive_id=glacier_upload(vault, target, args.keep_tarball)
+        data=write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
 
-    # writer = csv.DictWriter(args.archive_data,
-    #                         fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
-    #                         delimiter='\t',
-    #                         extrasaction = 'ignore')
-    # writer.writeheader()
-    # writer.writerows(data)
+    writer = csv.DictWriter(args.archive_data,
+                            fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
+                            delimiter='\t',
+                            extrasaction = 'ignore')
+    writer.writeheader()
+    writer.writerows(data)
 
