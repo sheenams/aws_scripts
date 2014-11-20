@@ -47,28 +47,16 @@ def walker(dir):
 
 def munge_path(pth):
     """
-    Get run, machine, assay and capture from path
+    Get date, machine, run, assay, version, 
+    141104_HA0194_OPX55
+    141006_HA0189_OncoPlex51    
     """
-    output=multi_split(pth, '/_')
-    if len(output)<4:
-        raise ValueError('Incorrect path given. Must be in the format of YYYY-MM-DD_Machine_Assay_Run#_version')
-    pathinfo={}
-    run=""
-    for i in output:
-        i=i.lower()
-        if i.startswith('20'):
-            run=i
-        elif i.startswith('run'):
-            pathinfo['run']=run+'_'+i
-        elif i.startswith('hi') or i.startswith('mi'):
-            pathinfo['machine']=i
-        elif i.startswith('onco') or i.startswith('colo'):
-            pathinfo['assay']=i
-        elif i.startswith('v'):
-            pathinfo['capture']=i
-
-    return pathinfo
-
+    parts=pth.split('_')
+    run_info=['run_date','machineID_run', 'project' ]
+    if len(output)<3:
+        raise ValueError('Incorrect path given. Must be in the format of YYMMDD_MachineIDRun#_Project')
+        
+    return zip(run_info, parts)
 
 class Opener(object):
     """Factory for creating file objects
