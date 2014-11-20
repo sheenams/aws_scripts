@@ -23,7 +23,10 @@ params = {'author': 'Sheena Scroggins',
           'package_dir': {'aws_scripts': 'aws_scripts'},
           'scripts': ['aws'],
           'version': __version__,
-          'package_data': {'aws_scripts': [join('data',f) for f in ['sha','ver']]}
+          'package_data': {'aws_scripts': [join('data',f) for f in ['sha','ver']]},
+          'install_requires': [
+              'boto==2.9.5'
+              ]
           }
     
 setup(**params)
