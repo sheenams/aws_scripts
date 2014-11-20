@@ -49,8 +49,8 @@ def build_parser(parser):
     parser.add_argument('year',
                         default=date.today().year,
                         help= 'used to help identify vault, convention uwlabmed-dept-YYYY, default current yeat')
-    parser.add_argument('keep_tarball',
-                        default=False,
+    parser.add_argument('delete_tarball',
+                        action='store_true',
                         help ='a .tar.gz archive (deleted by default) is created of the target directory before upload; use this option to prevent deletion')
 
 
@@ -105,7 +105,7 @@ def glacier_upload(vault, target, keep_tarball):
         logging.info('archived id: %s' % archive_id)
     except UploadArchiveError:
         logging.error('Failed to upload %s' % target)
-    if not keep_tarball:
+    if delete_tarball:
         subprocess.check_call(['rm', target+'.tar.gz'])
     return archive_id
 
@@ -114,14 +114,16 @@ def write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
     Store info in data for writing to archive file
     """
     data.append({
-            'dirname':target+'.tar.gz',
-            'vault_name':target_vault_name,
-            'archive_name' :archive_id,
-            'run' : munge_path(target)['run'],
-            'upload_date':str(date.today()),
-            'md5sum':md5sum,
-            'amazon_user':amazon_user
-            })
+        'dirname':target+'.tar.gz',
+        'vault_name':target_vault_name,
+        'archive_name' :archive_id,
+        'SampleProject':munge_path(target)['project'],
+        'run_date': munge_path(target)['run_date'] ,
+        'machineID_run': munge_path(target)['machineID_run'] 
+        'upload_date':str(date.today()),
+        'md5sum':md5sum,
+        'amazon_user':amazon_user
+    })
     logging.info('archive_info: %s' % data)
     return data
 
