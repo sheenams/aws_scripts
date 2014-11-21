@@ -52,8 +52,8 @@ def munge_path(pth):
     141006_HA0189_OncoPlex51    
     """
     parts=pth.split('_')
-    run_info=['run_date','machineID_run', 'project' ]
-    if len(output)<3:
+    run_info=['run_date','machineID_run[', 'project' ]
+    if len(parts)<3:
         raise ValueError('Incorrect path given. Must be in the format of YYMMDD_MachineIDRun#_Project')
         
     return zip(run_info, parts)

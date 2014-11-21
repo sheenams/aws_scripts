@@ -96,7 +96,7 @@ def get_md5sum(target):
     logging.info('md5sum: %s' % md5sum)
     return md5sum
 
-def glacier_upload(vault, target, keep_tarball):
+def glacier_upload(vault, target, delete_tarball):
     """
    # upload to glacier, fail if exception occurs
    """
@@ -118,8 +118,8 @@ def write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
         'vault_name':target_vault_name,
         'archive_name' :archive_id,
         'SampleProject':munge_path(target)['project'],
-        'run_date': munge_path(target)['run_date'] ,
-        'machineID_run': munge_path(target)['machineID_run'] 
+        'run_date': munge_path(target)['run_date'],
+        'machineID_run': munge_path(target)['machineID_run'],
         'upload_date':str(date.today()),
         'md5sum':md5sum,
         'amazon_user':amazon_user
@@ -133,6 +133,12 @@ def action(args):
 
     amazon_user=connect_iam()
     target_vault_name, vault=get_glacier_vault(args.year, args.dept)
+    writer = csv.DictWriter(args.archive_data,
+                            fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
+                            delimiter='\t',
+                            extrasaction = 'ignore')
+    writer.writeheader()
+
     for d in args.target_dir_list:
         d=d.rstrip("'\n','/'")
         parent,target=os.path.split(d)
@@ -140,13 +146,8 @@ def action(args):
 
         create_tarball(parent, target)
         md5sum=get_md5sum(target)
-        archive_id=glacier_upload(vault, target, args.keep_tarball)
+        archive_id=glacier_upload(vault, target, args.delete_tarball)
         data=write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
 
-    writer = csv.DictWriter(args.archive_data,
-                            fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
-                            delimiter='\t',
-                            extrasaction = 'ignore')
-    writer.writeheader()
-    writer.writerows(data)
+        writer.writerows(data)
 
