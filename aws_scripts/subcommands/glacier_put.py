@@ -117,9 +117,9 @@ def write_info(data, target, target_vault_name, archive_id, md5sum, amazon_user)
         'dirname':target+'.tar.gz',
         'vault_name':target_vault_name,
         'archive_name' :archive_id,
-        'SampleProject':munge_path(target)['project'],
-        'run_date': munge_path(target)['run_date'],
-        'machineID_run': munge_path(target)['machineID_run'],
+        'SampleProject':munge_path(target)[2],
+        'run_date': munge_path(target)[0],
+        'machineID_run': munge_path(target)[1],
         'upload_date':str(date.today()),
         'md5sum':md5sum,
         'amazon_user':amazon_user
