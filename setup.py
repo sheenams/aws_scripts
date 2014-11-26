@@ -1,7 +1,6 @@
 """
-Setup.py template. Try this:
+Setup.py for aws scripts
 
-    sed 's/aws_scripts/newpackagename/g;s/aws/newscriptname/g' setup.py
 """
 
 import os
