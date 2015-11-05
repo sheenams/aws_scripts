@@ -24,7 +24,7 @@ params = {'author': 'Sheena Scroggins',
           'version': __version__,
           'package_data': {'aws_scripts': [join('data',f) for f in ['sha','ver']]},
           'install_requires': [
-              'boto'
+           'boto==2.9.5'
               ]
           }
     
