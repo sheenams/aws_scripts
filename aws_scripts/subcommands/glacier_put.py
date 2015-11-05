@@ -11,7 +11,7 @@ import logging
 import os
 import csv
 import sys
-
+import IPython
 import subprocess
 import argparse
 import boto
@@ -36,10 +36,10 @@ def build_parser(parser):
                         type = argparse.FileType('w'),
                         help='Path to csv file containing results of upload')
     parser.add_argument('target_dir_list',
-                        type=argparse.FileType('rU'),
+                        nargs='?',
                         default=sys.stdin,
                         help='file containing one target_dir per line')
-    parser.add_argument('dept', choices = ['genetics','molmicro'],
+    parser.add_argument('dept', choices = ['genetics','molmicro','test'],
                         help = 'name of the dept for archival')
     parser.add_argument('year',
                         default=date.today().year,
@@ -65,7 +65,7 @@ def connect_iam():
 def get_glacier_vault(year, dept):
     """
     Connect to glacier and return the target vault
-    """
+   """
     glacier=boto.glacier.connect_to_region('us-west-2')
     target_vault_name='uwlabmed-'+dept+'-'+year
     #create vault if needed
@@ -75,15 +75,6 @@ def get_glacier_vault(year, dept):
         glacier.create_vault(target_vault_name)
         vault=glacier.get_vault(target_vault_name)
     return target_vault_name, vault
-
-def get_md5sum(target):
-    """
-    Calculate md5 checksum and set variable to just the sum, split from the filename
-    """
-    md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
-    md5sum=md5sum.split(' ')[0]
-    log.info('md5sum: %s' % md5sum)
-    return md5sum
 
 def glacier_upload(vault, target):
     """
@@ -100,39 +91,41 @@ def action(args):
 
     amazon_user=connect_iam()
     target_vault_name, vault=get_glacier_vault(args.year, args.dept)
-    writer = csv.DictWriter(args.archive_data,
-                            fieldnames = ['dirname', 'vault_name', 'archive_name', 'run', 'upload_date', 'md5sum', 'amazon_user'],
+    outfile = args.archive_data
+#    with open(args.archive_data) as outfile:
+    writer = csv.DictWriter(outfile,
+                            fieldnames = ['dirname', 'vault_name', 'archive_name','run', 'upload_date', 'md5sum', 'amazon_user','size'],
                             delimiter='\t',
                             extrasaction = 'ignore')
     writer.writeheader()
+    archive_target=args.target_dir_list
+    #archive_target cannot have trailing slash
+    parent,target=os.path.split(archive_target)
 
-    for d in args.target_dir_list:
-        d=d.rstrip("'\n','/'")
-        parent,target=os.path.split(d)
-        log.info('target: %s' % target)
+    subprocess.check_call(['tar','-C', parent,'-czf', target + '.tar.gz', target])
+    md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
+    md5sum=md5sum.split(' ')[0]
+    tarball=subprocess.check_output(['du', '-b',target+'.tar.gz'])
+    tarball_size=tarball.split('\t')[0]
 
-        subprocess.check_call(['tar','-C', parent,'-czf', target + '.tar.gz', target])
-        md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
-        md5sum=md5sum.split(' ')[0]
-        log.info('md5sum: %s' % md5sum)
-        
-        if args.test_scripts:
-            archive_id="test archival"
-        else:
-            print "running"
-            archive_id=glacier_upload(vault, target)
-        writer.writerow({
-            'dirname':target+'.tar.gz',
-            'vault_name':target_vault_name,
-            'archive_name' :archive_id,
-            'SampleProject':munge_path(target)[2],
-            'run_date': munge_path(target)[0],
-            'machineID_run': munge_path(target)[1],
-            'upload_date':str(date.today()),
-            'md5sum':md5sum,
-            'amazon_user':amazon_user})
+    if args.test_scripts:
+        archive_id="test archival"
+    else:
+        print "running"
+        archive_id=glacier_upload(vault, target)
+    writer.writerow({
+        'dirname':target+'.tar.gz',
+        'vault_name':target_vault_name,
+        'archive_name' :archive_id,
+        'SampleProject':munge_path(target)[2],
+        'run_date': munge_path(target)[0],
+        'machineID_run': munge_path(target)[1],
+        'upload_date':str(date.today()),
+        'md5sum':md5sum,
+        'amazon_user':amazon_user,
+        'size':tarball_size})
 
-        if args.delete_tarball:
-            subprocess.check_call(['rm', target+'.tar.gz'])
+    if args.delete_tarball:
+        subprocess.check_call(['rm', target+'.tar.gz'])
 
 
