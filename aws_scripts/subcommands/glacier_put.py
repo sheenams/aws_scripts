@@ -3,7 +3,7 @@ Purpose: archive a directory containing a run to glacier and document the archiv
 
 Usage:
 
-aws glacier_put archive_data.csv target_dir_list dept year 2>glacier_log
+aws glacier_put target_dir_list dept year 2>glacier_log
 
 """
 
@@ -32,9 +32,6 @@ logging.basicConfig(filename = fname,
 log.info("Starting archival on %s", date.today())
 
 def build_parser(parser):
-    parser.add_argument('archive_data',
-                        type = argparse.FileType('w'),
-                        help='Path to csv file containing results of upload')
     parser.add_argument('target_dir_list',
                         nargs='?',
                         default=sys.stdin,
@@ -91,16 +88,18 @@ def action(args):
 
     amazon_user=connect_iam()
     target_vault_name, vault=get_glacier_vault(args.year, args.dept)
-    outfile = args.archive_data
-#    with open(args.archive_data) as outfile:
-    writer = csv.DictWriter(outfile,
-                            fieldnames = ['dirname', 'vault_name', 'archive_name','run', 'upload_date', 'md5sum', 'amazon_user','size'],
-                            delimiter='\t',
-                            extrasaction = 'ignore')
-    writer.writeheader()
+
     archive_target=args.target_dir_list
     #archive_target cannot have trailing slash
     parent,target=os.path.split(archive_target)
+
+    outfile = open(archive_target+'/'+target+'-archive.txt','w')
+
+    writer = csv.DictWriter(outfile,
+                            fieldnames=['archive_description','archive_creation_date','archive_md5','archive_id','archive_vault_name','archive_size'],
+                            delimiter='\t',
+                            extrasaction = 'ignore')
+    writer.writeheader()
 
     subprocess.check_call(['tar','-C', parent,'-czf', target + '.tar.gz', target])
     md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
@@ -111,19 +110,15 @@ def action(args):
     if args.test_scripts:
         archive_id="test archival"
     else:
-        print "running"
+        print "archiving: ", target
         archive_id=glacier_upload(vault, target)
     writer.writerow({
-        'dirname':target+'.tar.gz',
-        'vault_name':target_vault_name,
-        'archive_name' :archive_id,
-        'SampleProject':munge_path(target)[2],
-        'run_date': munge_path(target)[0],
-        'machineID_run': munge_path(target)[1],
-        'upload_date':str(date.today()),
-        'md5sum':md5sum,
-        'amazon_user':amazon_user,
-        'size':tarball_size})
+        'archive_description':target,
+        'archive_creation_date':str(date.today()),
+        'archive_md5':md5sum,
+        'archive_id' :archive_id,
+        'archive_vault_name':target_vault_name,
+        'archive_size':tarball_size})
 
     if args.delete_tarball:
         subprocess.check_call(['rm', target+'.tar.gz'])
