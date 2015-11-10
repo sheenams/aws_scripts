@@ -30,11 +30,13 @@ outputdir = 'test_output'
 
 mkdir(outputdir)
 
+
 def get_testfile(fn):
     pth = path.join(datadir, fn)
     if not path.exists(pth):
         raise ValueError('no such file "{}"'.format(pth))
     return pth
+
 
 class TestBase(unittest.TestCase):
     """
@@ -44,7 +46,7 @@ class TestBase(unittest.TestCase):
 
     outputdir = outputdir
 
-    def mkoutdir(self, clobber = True):
+    def mkoutdir(self, clobber=True):
         """
         Create outdir as outpudir/module.class.method (destructively
         if clobber is True).
@@ -54,6 +56,7 @@ class TestBase(unittest.TestCase):
         outdir = path.join(self.outputdir, funcname)
         mkdir(outdir, clobber)
         return outdir
+
 
 class TestCaseSuppressOutput(unittest.TestCase):
 

@@ -13,7 +13,7 @@ from os import path
 log = logging.getLogger(__name__)
 
 
-def mkdir(dirpath, clobber = False):
+def mkdir(dirpath, clobber=False):
     """
     Create a (potentially existing) directory without errors. Raise
     OSError if directory can't be created. If clobber is True, remove
@@ -21,7 +21,7 @@ def mkdir(dirpath, clobber = False):
     """
 
     if clobber:
-        shutil.rmtree(dirpath, ignore_errors = True)
+        shutil.rmtree(dirpath, ignore_errors=True)
 
     try:
         os.mkdir(dirpath)
@@ -33,7 +33,8 @@ def mkdir(dirpath, clobber = False):
 
     return dirpath
 
-Path = namedtuple('Path', ['dir','fname'])
+Path = namedtuple('Path', ['dir', 'fname'])
+
 
 def walker(dir):
     """Recursively traverse direcory `dir`. For each tuple containing
@@ -45,18 +46,21 @@ def walker(dir):
         for fname in files:
             yield Path(pth, fname)
 
+
 def munge_path(pth):
     """
     Get date, machine, run, assay, version, 
     141104_HA0194_OPX55
     141006_HA0189_OncoPlex51    
     """
-    parts=pth.split('_')
-    run_info=['run_date','machineID_run', 'project' ]
-    if len(parts)<3:
-        raise ValueError('Incorrect path given. Must be in the format of YYMMDD_MachineIDRun#_Project')
-        
+    parts = pth.split('_')
+    run_info = ['run_date', 'machineID_run', 'project']
+    if len(parts) < 3:
+        raise ValueError(
+            'Incorrect path given. Must be in the format of YYMMDD_MachineIDRun#_Project')
+
     return zip(run_info, parts)
+
 
 class Opener(object):
     """Factory for creating file objects
@@ -68,7 +72,7 @@ class Opener(object):
             the builtin open() function.
     """
 
-    def __init__(self, mode = 'r', bufsize = -1):
+    def __init__(self, mode='r', bufsize=-1):
         self._mode = mode
         self._bufsize = bufsize
 
@@ -90,7 +94,7 @@ class Opener(object):
         return '{}({})'.format(type(self).__name__, args_str)
 
 
-def opener(pth, mode = 'r', bufsize = -1):
+def opener(pth, mode='r', bufsize=-1):
     return Opener(mode, bufsize)(pth)
 
 
@@ -98,18 +102,18 @@ def multi_split(source, splitlist):
     """
     Function to split a string given a string of multiple split points
     """
-    output=[]
-    atsplit=True
-    if source==None:
+    output = []
+    atsplit = True
+    if source == None:
         return None
     else:
         for char in source:
             if char in splitlist:
-                atsplit=True
+                atsplit = True
             else:
                 if atsplit:
                     output.append(char)
-                    atsplit=False
+                    atsplit = False
                 else:
-                    output[-1]=output[-1]+char
+                    output[-1] = output[-1] + char
     return output
