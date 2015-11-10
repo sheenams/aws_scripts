@@ -92,15 +92,19 @@ def action(args):
     archive_target=args.target_dir_list
     #archive_target cannot have trailing slash
     parent,target=os.path.split(archive_target)
+    
+    #munge the info for database import
+    run_date, run, project = munge_path(target)
 
+    #Setup the output file
     outfile = open(archive_target+'/'+target+'-archive.txt','w')
-
     writer = csv.DictWriter(outfile,
-                            fieldnames=['archive_description','archive_creation_date','archive_md5','archive_id','archive_vault_name','archive_size'],
+                            fieldnames=['archive_description','archive_creation_date','archive_md5','archive_id','archive_vault_name','archive_size','run','project'],
                             delimiter='\t',
                             extrasaction = 'ignore')
     writer.writeheader()
-
+    
+    #Begin the actual archival process
     subprocess.check_call(['tar','-C', parent,'-czf', target + '.tar.gz', target])
     md5sum=subprocess.check_output(['md5sum', target+'.tar.gz'])
     md5sum=md5sum.split(' ')[0]
@@ -118,7 +122,9 @@ def action(args):
         'archive_md5':md5sum,
         'archive_id' :archive_id,
         'archive_vault_name':target_vault_name,
-        'archive_size':tarball_size})
+        'archive_size':tarball_size,
+        'run': run,
+        'project': project })
 
     if args.delete_tarball:
         subprocess.check_call(['rm', target+'.tar.gz'])
