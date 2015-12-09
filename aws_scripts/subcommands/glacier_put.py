@@ -128,8 +128,8 @@ def action(args):
         'archive_id' :archive_id,
         'archive_vault_name':target_vault_name,
         'archive_size':tarball_size,
-        'run': run,
-        'project': project })
+        'run': run[1],
+        'project': project[1] })
 
     if args.delete_tarball:
         subprocess.check_call(['rm', target + '.tar.gz'])
