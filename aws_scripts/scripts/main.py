@@ -12,27 +12,6 @@ from aws_scripts import subcommands, __version__ as version, __doc__ as docstrin
 from aws_scripts.utils import Opener
 
 
-def main(argv):
-    action, arguments = parse_arguments(argv)
-
-    loglevel = {
-        0: logging.ERROR,
-        1: logging.WARNING,
-        2: logging.INFO,
-        3: logging.DEBUG,
-    }.get(arguments.verbosity, logging.DEBUG)
-
-    if arguments.verbosity > 1:
-        logformat = '%(levelname)s %(module)s %(lineno)s %(message)s'
-    else:
-        logformat = '%(message)s'
-
-    logging.basicConfig(stream=arguments.logfile,
-                        format=logformat, level=loglevel)
-
-    return action(arguments)
-
-
 def parse_arguments(argv):
     """
     Create the argument parser
@@ -67,10 +46,9 @@ def parse_arguments(argv):
     # End help sub-command
 
     # Organize submodules by argv
-    modules = [name for _, name,
-               _ in pkgutil.iter_modules(subcommands.__path__)]
+    modules = [name for _, name, _ in pkgutil.iter_modules(subcommands.__path__)]
     modules = [m for m in modules if not m.startswith('_')]
-    run = filter(lambda name: name in argv, modules)
+    run = [name for name in modules if name in argv]
 
     actions = {}
 
@@ -98,6 +76,7 @@ def parse_arguments(argv):
             formatter_class=RawDescriptionHelpFormatter)
         mod.build_parser(subparser)
         actions[name] = mod.action
+
     # Determine we have called ourself (e.g. "help <action>")
     # Set arguments to display help if parameter is set
     #           *or*
@@ -112,3 +91,27 @@ def parse_arguments(argv):
         return parse_arguments([str(arguments.action[0]), '-h'])
 
     return actions[action], arguments
+
+
+def main(argv=None):
+
+    if argv is None:
+        argv = sys.argv[1:]
+
+    action, arguments = parse_arguments(argv)
+
+    loglevel = {
+        0: logging.ERROR,
+        1: logging.WARNING,
+        2: logging.INFO,
+        3: logging.DEBUG,
+    }.get(arguments.verbosity, logging.DEBUG)
+
+    if arguments.verbosity > 1:
+        logformat = '%(levelname)s %(module)s %(lineno)s %(message)s'
+    else:
+        logformat = '%(message)s'
+
+    logging.basicConfig(stream=arguments.logfile, format=logformat, level=loglevel)
+
+    return action(arguments)

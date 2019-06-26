@@ -5,7 +5,6 @@ import logging
 import shutil
 import sys
 
-from itertools import takewhile, izip_longest
 from csv import DictReader
 from collections import Iterable, OrderedDict, namedtuple
 from os import path
@@ -25,7 +24,7 @@ def mkdir(dirpath, clobber=False):
 
     try:
         os.mkdir(dirpath)
-    except OSError, msg:
+    except OSError as msg:
         pass
 
     if not os.path.exists(dirpath):
