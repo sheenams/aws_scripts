@@ -2,38 +2,20 @@
 AWS Scripts
 ======================================
 
-Scripts to push and pull data from Glacier using boto
+Scripts to push data to AWS
 
 .. contents:: Table of Contents
 
 
 dependencies
 ============
-
-* Python 2.7.x
-* Tested on Linux and OS X.
-* boto 2.9.5 
-
+Written using: 
+* Python 3.6.8
+* awscli 1.16.183
+* Ubuntu 18
+  
 installation
 ============
-Boto installation:
-   $ pip install -U boto
-
-Edit the .boto configuration file
-   [Credentials]
-   aws_access_key_id = 
-   aws_secret_access_key =
-   
-   [Boto]
-   ec2_region_name = us-west-2
-   ec2_region_endpoint = us-west-2.ec2.amazonaws.com
-
-   sqs_region_name = us-west-2
-   sqs_region_endpoint = us-west-2.ec2.amazonaws.com
-   
-   glacier_region_name = us-west-2
-   glacier_region_endpoint = us-west-2.ec2.amazonaws.com
-
 
 Clone the project from the git repository to create a new
 project. You will need to choose a name for the project (let's say
@@ -41,6 +23,7 @@ project. You will need to choose a name for the project (let's say
 
     $ git clone git://github.com/sheenams/aws_scripts.git aws_scripts
 
+  
 execution
 =========
 
