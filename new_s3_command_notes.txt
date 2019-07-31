@@ -1,0 +1,13 @@
+#For the given project:
+1. Find the pipeline manifest
+: /mnt/disk13/genetics/archival/<PIPELINE>/<PROJECT>/settings_files/pipeline-manifest.csv
+2. From that, we'll grab
+* barcode_id
+* assay
+* sample_type
+
+3. Assay needs to have 'v#' stripped off to become assay "bucket" name
+4. Sample type containts 'HC' or 'HAPMAP'it is  a control (regardless of other types listed for this sample), everything else is "sample". 
+5 Barcode id will require parsing in order to match fastq name, but IS "SAMPLE_ID" in s3.
+
+
