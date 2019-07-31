@@ -62,7 +62,7 @@ def define_assay(project):
     else:
         assay='error in parsing assay name from project'
 
-    return assay
+    return assay.lower()
 
     
 def check_year(value):
